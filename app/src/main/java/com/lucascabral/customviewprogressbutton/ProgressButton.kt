@@ -18,8 +18,15 @@ class ProgressButton @JvmOverloads constructor(
 
     private val binding = ProgressButtonBinding.inflate(LayoutInflater.from(context), this, true)
 
+    private var state: ProgressButtonState = ProgressButtonState.Normal
+        set(value) {
+            field = value
+            refreshState()
+        }
+
     init {
         setLayout(attrs)
+        refreshState()
     }
 
     private fun setLayout(attrs: AttributeSet?) {
@@ -43,6 +50,32 @@ class ProgressButton @JvmOverloads constructor(
 
             attributes.recycle()
         }
+    }
+
+    private fun refreshState() {
+        isEnabled = state.isEnabled
+        isClickable = state.isEnabled
+        refreshDrawableState()
+
+        binding.buttonTitleTextView.run {
+            isEnabled = state.isEnabled
+            isClickable = state.isEnabled
+        }
+
+        binding.buttonProgressBar.visibility = state.progressVisibility
+
+        when(state) {
+            ProgressButtonState.Normal -> binding.buttonTitleTextView.text = title
+            ProgressButtonState.Loading -> binding.buttonTitleTextView.text = loadingTitle
+        }
+    }
+
+    fun setLoading() {
+        state = ProgressButtonState.Loading
+    }
+
+    fun setNormal() {
+        state = ProgressButtonState.Normal
     }
 
     sealed class ProgressButtonState(val isEnabled: Boolean, val progressVisibility: Int) {
